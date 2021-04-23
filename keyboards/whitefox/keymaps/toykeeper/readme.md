@@ -54,9 +54,33 @@ Fn2 exclusive functions are...
 * Configure keyboard settings:
   * Switch main layer between qwerty and dvorak
   * Toggle NKRO
-  * Some keys are reserved for lighting controls, but aren't used in this layout because my Whitefox has no LEDs
-  * Also leaves room for configuring features on other similar keyboards...  like on a Massdrop Alt I'll add keys to swap BackSpace and BackSlash
+  * Some keys are reserved for lighting controls, but aren't used in this
+    layout because my Whitefox has no LEDs
+  * Also leaves room for configuring features on other similar keyboards...
+    like on a Massdrop Alt I'll add keys to swap BackSpace and BackSlash
 
+## Layout Images
+
+Qwerty layer:
+![Qwerty layer](http://toykeeper.net/keyboard/qmk/tk-whitefox.2021-04-23a.l0.png)
+
+Dvorak layer:
+![Dvorak layer](http://toykeeper.net/keyboard/qmk/tk-whitefox.2021-04-23a.l1.png)
+
+Fn1 layer:
+![Fn1 layer](http://toykeeper.net/keyboard/qmk/tk-whitefox.2021-04-23a.l2.png)
+
+Fn2 layer:
+![Fn2 layer](http://toykeeper.net/keyboard/qmk/tk-whitefox.2021-04-23a.l3.png)
+
+## Known Issues
+
+Would like to overload Fn2 as Home, but I haven't found a way to do that which
+doesn't cause timing issues when using it as Fn.  Similar story for Fn1...
+would like to make it lockable so the user can use mouse keys without having to
+hold a Fn key, but TT(layer) causes timing issues when using it momentary
+style.  So it uses regular momentary Fn keys instead.  They're not as fancy,
+but they're not as fragile either.
 
 ## Changes
 
