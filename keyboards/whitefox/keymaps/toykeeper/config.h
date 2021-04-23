@@ -41,9 +41,12 @@
 // - TT(layer) doesn't work
 // - Space Cadet shift keys don't work
 // - can't press+release an overloaded key without sending the "tap" version
-#define RETRO_TAPPING
+//#define RETRO_TAPPING
 #undef  TAPPING_TERM
-#define TAPPING_TERM 1  // default 200
+//#define TAPPING_TERM 1  // default 200
+// meh, use MO(layer) instead of the fancy stuff,
+// and set a longer tap time so Space Cadet can work
+#define TAPPING_TERM 150  // default 200
 
 ///// make the mouse more usable /////
 // Delay between pressing a movement key and cursor movement
