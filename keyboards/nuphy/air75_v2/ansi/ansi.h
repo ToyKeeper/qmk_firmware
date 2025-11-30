@@ -169,4 +169,6 @@ typedef struct
     uint8_t sleep_enable;
     uint8_t retain1;
     uint8_t retain2;
-} user_config_t;
+} kb_config_t;
+//#define EECONFIG_KB_DATA_SIZE sizeof(kb_config_t)
+
