@@ -14,6 +14,10 @@
 #define USE_NUMPAD
 //#define USE_CAPSWORD_KLUDGE  // improve CapsWord when host remaps the keys?
 
+///// Chords / combos
+#undef COMBO_COUNT
+#define COMBO_COUNT 2
+
 
 #ifdef HAS_RGB
 

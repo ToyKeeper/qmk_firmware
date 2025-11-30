@@ -37,6 +37,12 @@
 // OneShot keys were never timing out
 #define ONESHOT_TIMEOUT 5000  // 5s
 
+///// Chords / combos
+// work around a key I keep missing
+#define COMBO_COUNT 1
+// ... and make it work regardless of what layout I'm using
+#define COMBO_ONLY_FROM_LAYER 0
+
 
 ///// make the mouse more usable /////
 

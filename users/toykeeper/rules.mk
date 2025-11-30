@@ -21,6 +21,9 @@ SPACE_CADET_ENABLE = yes
 # tap both shifts for temporary capslock which lasts only one word
 CAPS_WORD_ENABLE   = yes
 
+# make better use of that giant non-split backspace key
+COMBO_ENABLE = yes
+
 # this causes a compiler error when enabled
 VISUALIZER_ENABLE  = no
 

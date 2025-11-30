@@ -3,6 +3,21 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
+// TODO:
+// + tap Moon for left click
+// + chord VOLD+VOLU = MUTE
+// - RF_DFU
+// * KC_BRID, KC_BRIU
+// * LNK_BLE1, LNK_BLE2, LNK_BLE3, LNK_RF
+// - LNK_USB
+// - RGB_TEST
+// + BAT_NUM, BAT_SHOW
+// * KC_MUTE, KC_VOLD, KC_VOLU
+// - DEV_RESET, SLEEP_MODE
+// ? SIDE_MOD, SIDE_VAD, SIDE_VAI, SIDE_HUI, SIDE_SPD, SIDE_SPI
+//   (I may just want these off, no key mappings needed?)
+//   (side lights are nice for battery and wireless status, but annoying otherwise)
+
 #include QMK_KEYBOARD_H
 
 #include "toykeeper.h"
@@ -92,21 +107,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     TK_DF_0,  TK_DF_1,  TK_DF_2,                          RGB_TOG,                            KC_APP , _______, _______, KC_HOME, KC_PGDN, KC_END
     ),
 
-// TODO:
-// - tap Moon for left click
-// - chord VOLD+VOLU = MUTE
-// - RF_DFU
-// * KC_BRID, KC_BRIU
-// * LNK_BLE1, LNK_BLE2, LNK_BLE3, LNK_RF
-// - LNK_USB
-// - RGB_TEST
-// + BAT_NUM, BAT_SHOW
-// * KC_MUTE, KC_VOLD, KC_VOLU
-// - DEV_RESET, SLEEP_MODE
-// ? SIDE_MOD, SIDE_VAD, SIDE_VAI, SIDE_HUI, SIDE_SPD, SIDE_SPI
-//   (I may just want these off, no key mappings needed?)
-//   (side lights are nice for battery and wireless status, but annoying otherwise)
-
 };
 
 const uint8_t layer_indicator_colors[][6] = {
@@ -130,6 +130,14 @@ const uint8_t mod_indicator_coords[][3] = {
     { 4,12, 5, },  // R GUI
     { 0, 0, 0, },  // stop
 };
+
+const uint16_t PROGMEM backslash_equal[] = {KC_BSLS, KC_EQL, COMBO_END};
+const uint16_t PROGMEM vol_up_down[] = {KC_VOLU, KC_VOLD, COMBO_END};
+combo_t key_combos[COMBO_COUNT] = {
+    COMBO(backslash_equal, TK_SINS),  // paste even if my fingers are off by one column
+    COMBO(vol_up_down, KC_MUTE),  // volume up+down = mute
+};
+
 
 /* original Nuphy layers
 // layer Mac
