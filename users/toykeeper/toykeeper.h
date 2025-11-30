@@ -120,7 +120,8 @@ enum my_keycodes {
 #define TK_RGUI  MT(MOD_RGUI,_______)  // RGUI / oneshot(RALT) / hold(RALT)
 #else
 // 65% to 75% layouts
-#define TK_MOON  MT(L_FN1,L_FN1)  // hold / lock / clear L_FN1
+//#define TK_MOON  MT(L_FN1,L_FN1)  // hold / lock / clear L_FN1
+#define TK_MOON  LT(L_FN1,KC_BTN1)
 #define TK_STAR  LT(L_FN2,KC_HOME)
 #define TK_MOUS  TT(L_MOUSE)
 #define TK_FN1   TK_MOON

@@ -333,6 +333,23 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         #else  // no palm keys
 
         // hold = momentary(L_FN1)
+        // tap = left click
+        case TK_MOON:
+            switch (record->tap.count) {
+                case 0:  // Moon layer hold
+                    return true;  // QMK can handle it
+                default:  // mouse click afterward
+                    if (record->event.pressed) {
+                        register_code(KC_BTN1);
+                    } else {
+                        unregister_code(KC_BTN1);
+                    }
+                    return false;
+            }
+            break;
+
+        #if 0
+        // hold = momentary(L_FN1)
         // tap = layer_off(L_FN1)
         // 2tap+ = layer_on(L_FN1)
         // (don't enable it on 1st tap, because sometimes I do that by accident)
@@ -349,6 +366,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 return false;
             }
             break;
+        #endif
 
         #endif  // ifdef USE_PALM
 
