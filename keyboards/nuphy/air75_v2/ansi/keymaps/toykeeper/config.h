@@ -8,13 +8,13 @@
 ///// personal config stuff /////
 
 #define IS_NUPHY_AIR75v2
+// in wireless mode, macros need to play slower
+#define DYNAMIC_MACRO_DELAY 16
 
 #define HAS_RGB
-// FIXME: Nuphy dip switches don't use standard QMK methods; need to override Nuphy's hardcoded handlers
 #define HAS_DIPSWITCH
 #define HAS_F_ROW
 #define USE_NUMPAD
-//#define USE_CAPSWORD_KLUDGE  // improve CapsWord when host remaps the keys?
 
 ///// Chords / combos
 #define COMBO_COUNT 2
