@@ -9,7 +9,7 @@ A relatively straightforward 75% layout with some extras.
 This is the layout internally, showing all the functions for each key:
 ![TK Air75 v2](https://toykeeper.net/keyboard/qmk/tk-air75v2.png)
 
-This layout diagram can be edited [here](http://www.keyboard-layout-editor.com/#/gists/FIXME).
+This layout diagram can be edited [here](https://www.keyboard-layout-editor.com/#/gists/ab4bb8663c39104a248fe585cc217b3e).
 
 
 ## Core Features
