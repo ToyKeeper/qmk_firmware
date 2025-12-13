@@ -1,17 +1,6 @@
-/* Copyright 2021-2022 Selene ToyKeeper
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+/* ToyKeeper's shared keyboard functions
+ * Copyright 2021-2025 Selene ToyKeeper
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 #include "toykeeper.h"
@@ -19,29 +8,30 @@
 #ifdef HAS_RGB
 // highlight color for each layer while active
 __attribute__ ((weak)) const uint8_t layer_colors[][3] = {
-    [L_QWERTY  ] = {0,0,0},
-    [L_DVORAK  ] = {0,0,0},
-    [L_UNDVORAK] = {0,0,0},
-    [L_COLEMAK ] = {0,0,0},
+    [L_QWERTY  ] = {  0,  0,  0},
+    [L_DVORAK  ] = {  0,  0,  0},
+    [L_UNDVORAK] = {  0,  0,  0},
+    [L_COLEMAK ] = {  0,  0,  0},
     #ifdef USE_NUMPAD
-    [L_NUMPAD  ] = {192,0,0},
+    [L_NUMPAD  ] = {192,  0,  0},
     #endif
     #ifdef HAS_F_ROW
-    [L_FLCK    ] = {50,10,0},   // yellow
+    [L_FLCK    ] = { 50, 10,  0},  // yellow
     #endif
     #ifdef USE_PALM  // palm Fn keys
-    [L_LPALM   ] = {224,0,80},  // left palm key
-    [L_RPALM   ] = {224,0,16},  // right palm key
-    [L_BOTH    ] = {0,50,25},   // both palm keys
+    [L_LPALM   ] = {224,  0, 80},  // left palm key
+    [L_RPALM   ] = {224,  0, 16},  // right palm key
+    [L_BOTH    ] = {  0, 50, 25},  // both palm keys
     #else  // regular Fn keys
-    [L_MOUSE   ] = {224,0,16},  // bubble gum pink
-    [L_FN1     ] = {224,0,80},  // neon purple-ish
-    [L_FN2     ] = {0,50,25},   // teal
+    [L_MOUSE   ] = {224,  0, 16},  // bubble gum pink
+    [L_FN1     ] = {224,  0, 80},  // neon purple-ish
+    [L_FN2     ] = {  0, 50, 25},  // teal
     #endif
     #ifdef HAS_XTRA_COLUMN
-    [L_XC1     ] = {224,0,80},  // neon purple-ish
-    [L_XC2     ] = {0,50,25},   // teal
-    [L_XC3     ] = {224,0,16},  // bubble gum pink
+    [L_XC1     ] = {224, 16, 16},  // white-ish
+    [L_XC2     ] = {224,  0, 80},  // neon purple-ish
+    [L_XC3     ] = {  0, 50, 25},  // teal
+    [L_XC4     ] = {224,  0, 16},  // bubble gum pink
     #endif
 };
 __attribute__ ((weak)) const uint8_t layer_indicator_colors[][6] = {
@@ -75,6 +65,7 @@ __attribute__ ((weak)) const uint8_t mod_indicator_coords[][3] = {
     { 0, 0, 0, },  // stop
 };
 
+void apply_rgb_enabled(void);
 #endif
 
 #ifndef DONT_USE_EEPROM
@@ -91,6 +82,14 @@ deferred_token any_key_token;
 uint32_t any_key_cb(uint32_t time, void *arg);
 void tap_random_key(void);
 #endif
+
+
+/*
+__attribute__ ((weak)) const uint16_t PROGMEM backslash_equal[] = {KC_BSLS, KC_EQL, COMBO_END};
+__attribute__ ((weak)) combo_t key_combos[COMBO_COUNT] = {
+    COMBO(backslash_equal, TK_SINS),  // paste even if my fingers are off by one column
+};
+*/
 
 
 #ifdef HAS_RGB
@@ -187,6 +186,21 @@ rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     return false;
     #endif
 }
+
+#ifndef DONT_USE_EEPROM
+void apply_rgb_enabled(void) {
+    if (user_config.rgb_enabled) {
+        // apply user's default saved RGB mode and settings
+        rgb_matrix_reload_from_eeprom();
+    } else {
+        // disable everything except indicators
+        // https://docs.qmk.fm/features/rgb_matrix
+        // section: "Indicators without RGB Matrix Effect"
+        rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
+        rgb_matrix_sethsv_noeeprom(HSV_OFF);
+    }
+}
+#endif
 #endif  // ifdef HAS_RGB
 
 
@@ -227,10 +241,11 @@ void set_df_layer(uint8_t layer) {
 
 #ifdef HAS_XTRA_COLUMN
 // Xtra Column layers work like base layers... but on only a few keys
+uint8_t xc_layer = 0;
 void set_xc_layer(uint8_t layer) {
     // activate layer if > 0
     // ... and deactivate all other XC layers > 0
-    for (uint8_t i=1; i<=3; i++) {
+    for (uint8_t i = 1; i <= NUM_XC_LAYERS; i ++) {
         if (i == layer) { layer_on(L_XC1 + i - 1); }
         else { layer_off(L_XC1 + i - 1); }
     }
@@ -274,6 +289,11 @@ void keyboard_post_init_user(void) {
         if (user_config.f_lock) layer_on(L_FLCK);
     #endif
 
+    #ifdef HAS_RGB
+        // restore user's RGB matrix setting
+        apply_rgb_enabled();
+    #endif
+
     // allow normal processing after this point
     boot_complete = 1;
 }
@@ -284,17 +304,25 @@ void eeconfig_init_user(void) {
     user_config.raw = 0;
 
     #ifdef HAS_DIPSWITCH
+        // each can store values 0 to 3, for the 4 base layers
         user_config.switch_off = 0;  // qwerty
         user_config.switch_on = 1;   // dvorak
     #endif
     #ifdef HAS_F_ROW
-        user_config.f_lock = 0;      // regular F1-F12 keys by default
+        // 1 = F1-F12 keys, 0 = launcher keys
+        user_config.f_lock = 0;
     #endif
     #ifndef DONT_USE_TK_IUUI
-        user_config.dvoriuk = 0;     // don't swap keys on dvorak layer
+        // don't swap keys on dvorak layer
+        user_config.dvoriuk = 0;
+    #endif
+    #ifdef HAS_RGB
+        // default to RGB on
+        user_config.rgb_enabled = 1;
     #endif
     #ifdef IS_NUPHY_AIR75v2
-        user_config.bat_show = 1;    // show battery charge on side LEDs
+        // show battery charge on side LEDs
+        user_config.bat_show = 1;
     #endif
 
     eeconfig_update_user_datablock(&user_config);
@@ -319,61 +347,29 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
         #endif  // ifndef DONT_USE_TK_INFO
 
+        #if defined(HAS_RGB) && !defined(DONT_USE_EEPROM)
+        case TK_RGBT:
+            if (record->event.pressed) {
+                user_config.rgb_enabled = (! user_config.rgb_enabled);
+                //eeconfig_update_user(user_config.raw);
+                eeconfig_update_user_datablock(&user_config);
+                apply_rgb_enabled();
+            }
+            return true;
+        #endif  // #if defined(HAS_RGB) && !defined(DONT_USE_EEPROM)
+
         #ifndef DONT_USE_ANY_KEY
         // random character (with auto-repeat)
         case TK_ANY:
             if (record->event.pressed) {
                 tap_random_key();
+                // can't use host's auto-repeat, simulate it internally
                 any_key_token = defer_exec(AUTOREPEAT_DELAY, any_key_cb, NULL);
             } else {
                 cancel_deferred_exec(any_key_token);
             }
             return false;
         #endif  // ifndef DONT_USE_ANY_KEY
-
-        #ifdef USE_PALM  // palm keys
-
-        // I was going to do something fancy here... but meh
-
-        #else  // no palm keys
-
-        // hold = momentary(L_FN1)
-        // tap = left click
-        case TK_MOON:
-            switch (record->tap.count) {
-                case 0:  // Moon layer hold
-                    return true;  // QMK can handle it
-                default:  // mouse click afterward
-                    if (record->event.pressed) {
-                        register_code(KC_BTN1);
-                    } else {
-                        unregister_code(KC_BTN1);
-                    }
-                    return false;
-            }
-            break;
-
-        #if 0
-        // hold = momentary(L_FN1)
-        // tap = layer_off(L_FN1)
-        // 2tap+ = layer_on(L_FN1)
-        // (don't enable it on 1st tap, because sometimes I do that by accident)
-        case TK_MOON:
-            if ((1 == record->tap.count) && record->event.pressed) {
-                layer_off(L_FN1);  // TG(L_FN1) off
-                return false;
-            } else if (record->event.pressed) {
-                layer_on(L_FN1);  // MO(L_FN1) on, TG(L_FN1) on
-                return false;
-            }
-            else if (!(record->tap.count) && !(record->event.pressed)) {
-                layer_off(L_FN1);  // MO(L_FN1) off
-                return false;
-            }
-            break;
-        #endif
-
-        #endif  // ifdef USE_PALM
 
         // LGUI / RGUI depend on the keyboard:
         // - full 65%/75% layout:
@@ -480,6 +476,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             break;
         #else  // normal: no USE_PALM, no USE_RGUI_2TAP_MOUSELOCK
         case TK_RGUI:
+            // can't use `RGUI_T(layer_invert(L_MOUSE))`
             // hold: RGUI  /  tap: MouseLock
             if (0 == record->tap.count) {
                 layer_off(L_MOUSE);
@@ -499,6 +496,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         #ifdef USE_NUMPAD
         // - hold: RCTL
         // - tap: toggle L_NUMPAD
+        // can't use `RCTL_T(layer_invert(L_NUMPAD))`
         case TK_RCTL:
             if (record->tap.count && record->event.pressed) {
                 layer_invert(L_NUMPAD);
@@ -514,8 +512,15 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
         #ifdef HAS_XTRA_COLUMN
         // choose a base layer for Xtra Column keys
-        case TK_XC_0 ... TK_XC_3:
-            if (record->event.pressed) set_xc_layer(keycode - TK_XC_0);
+        case TK_XC_0 ... TK_XC_4:
+            if (record->event.pressed) {
+                uint8_t layer = keycode - TK_XC_0;
+                // toggle between 0 and 1
+                if ((0 == xc_layer) && (0 == layer)) layer = 1;
+                // TODO? each tap rotates to next layer?
+                xc_layer = layer;
+                set_xc_layer(layer);
+            }
             return false;
         #endif
 
@@ -638,3 +643,4 @@ void tap_random_key(void) {
     }
 }
 #endif  // ifndef DONT_USE_ANY_KEY
+

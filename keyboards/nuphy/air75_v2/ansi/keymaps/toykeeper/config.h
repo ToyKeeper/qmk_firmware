@@ -1,6 +1,6 @@
 // config.h for ToyKeeper's Nuphy Air75 v2 QMK keymap
 // Copyright 2025 Selene ToyKeeper
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #define KEYMAP_URL "https://toykeeper.net/keyboard/qmk/tk-air75v2.png"
@@ -17,8 +17,9 @@
 //#define USE_CAPSWORD_KLUDGE  // improve CapsWord when host remaps the keys?
 
 ///// Chords / combos
-#undef COMBO_COUNT
 #define COMBO_COUNT 2
+// ... and make it work regardless of what layout I'm using
+#define COMBO_ONLY_FROM_LAYER 0
 
 
 #ifdef HAS_RGB

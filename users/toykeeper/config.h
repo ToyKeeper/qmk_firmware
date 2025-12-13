@@ -1,6 +1,6 @@
-// Copyright 2022 Selene ToyKeeper
-// SPDX-License-Identifier: GPL-2.0-or-later
 // config.h for ToyKeeper's keymaps
+// Copyright 2022-2025 Selene ToyKeeper
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 // Scan at ~1000 Hz
@@ -36,12 +36,6 @@
 
 // OneShot keys were never timing out
 #define ONESHOT_TIMEOUT 5000  // 5s
-
-///// Chords / combos
-// work around a key I keep missing
-#define COMBO_COUNT 1
-// ... and make it work regardless of what layout I'm using
-#define COMBO_ONLY_FROM_LAYER 0
 
 
 ///// make the mouse more usable /////

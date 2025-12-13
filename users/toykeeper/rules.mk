@@ -1,6 +1,6 @@
-# Copyright 2022 Selene ToyKeeper
-# SPDX-License-Identifier: GPL-2.0-or-later
 # Compile options for ToyKeeper's keymaps
+# Copyright 2022-2025 Selene ToyKeeper
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 ##### Shared options
 
@@ -21,8 +21,8 @@ SPACE_CADET_ENABLE = yes
 # tap both shifts for temporary capslock which lasts only one word
 CAPS_WORD_ENABLE   = yes
 
-# make better use of that giant non-split backspace key
-COMBO_ENABLE = yes
+# enable combos per keyboard; not all need it or have space
+#COMBO_ENABLE = yes
 
 # this causes a compiler error when enabled
 VISUALIZER_ENABLE  = no

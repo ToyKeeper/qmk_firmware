@@ -1,17 +1,6 @@
-/* Copyright 2021-2022 Selene ToyKeeper
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+/* ToyKeeper's shared keyboard functions header
+ * Copyright 2021-2025 Selene ToyKeeper
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 #pragma once
@@ -85,9 +74,11 @@ enum {
     L_XC1,
     L_XC2,
     L_XC3,
+    L_XC4,
     #endif
 };
-#define L_BOTTOM (L_COLEMAK+1)  // lowest non-default layer
+#define L_BOTTOM  (L_COLEMAK+1)  // lowest non-default layer
+#define NUM_XC_LAYERS  4
 
 enum my_keycodes {
     //TK_INFO = SAFE_RANGE,  // print build version / info
@@ -102,9 +93,17 @@ enum my_keycodes {
     TK_XC_1,  // Xtra Column mode 1
     TK_XC_2,  // Xtra Column mode 2
     TK_XC_3,  // Xtra Column mode 3
+    TK_XC_4,  // Xtra Column mode 4
     // other custom keys
     TK_IUUI,  // toggle U/I swap on dvorak layer
     TK_ANY,   // the "Any" key, spits out random characters
+    // toggle RGB Matrix effects on/off without disabling indicators
+    TK_RGBT,  // RGB toggle
+    // dynamic macros with forced layer-clear
+    TK_REC1,
+    TK_REC2,
+    //TK_PLY1,
+    //TK_PLY2,
     #ifdef IS_NUPHY_AIR75v2
     TK_BAT,   // show battery charge level on side LEDs
     TK_BNOW,  // show battery charge level on number keys
@@ -160,8 +159,47 @@ void nuphy_indicators_user(void);
 #define BS_TOGG  _______  // don't break build on old versions
 #endif
 // TODO, maybe, someday: lockable control keys
-#define TK_LCLK KC_LCTL
-#define TK_RCLK KC_RCTL
+#define TK_LCLK  KC_LCTL
+#define TK_RCLK  KC_RCTL
+
+// legacy mouse events from old QMK
+/*
+#ifndef KC_MS_U
+#define KC_MS_U  MS_UP
+#define KC_MS_D  MS_DOWN
+#define KC_MS_L  MS_LEFT
+#define KC_MS_R  MS_RGHT
+#define KC_WH_U  MS_WHLU
+#define KC_WH_D  MS_WHLD
+#define KC_WH_L  MS_WHLL
+#define KC_WH_R  MS_WHLR
+#define KC_BTN1  MS_BTN1
+#define KC_BTN2  MS_BTN2
+#define KC_BTN3  MS_BTN3
+#define KC_BTN4  MS_BTN4
+#define KC_BTN5  MS_BTN5
+#define KC_BTN6  MS_BTN6
+#define KC_BTN7  MS_BTN7
+#define KC_BTN8  MS_BTN8
+#define KC_BTN9  MS_BTN9
+#endif
+*/
+
+// legacy RGB controls from old QMK
+#ifndef RGB_TOG
+//#define RGB_TOG  RM_TOGG
+#define RGB_TOG  TK_RGBT
+#define RGB_MOD  RM_NEXT
+#define RGB_MOU  RM_PREV
+#define RGB_HUI  RM_HUEU
+#define RGB_HUD  RM_HUED
+#define RGB_SAI  RM_SATU
+#define RGB_SAD  RM_SATD
+#define RGB_VAI  RM_VALU
+#define RGB_VAD  RM_VALD
+#define RGB_SPI  RM_SPDU
+#define RGB_SPD  RM_SPDD
+#endif
 
 
 #ifndef DONT_USE_EEPROM
@@ -178,6 +216,9 @@ typedef union {
         #endif
         #ifndef DONT_USE_TK_IUUI
             unsigned dvoriuk    : 1;  // swap U and I in dvorak layer?
+        #endif
+        #ifdef HAS_RGB
+            unsigned rgb_enabled : 1;  // enable RGB matrix
         #endif
         #ifdef IS_NUPHY_AIR75v2
             unsigned bat_show   : 1;  // show battery status on side LEDs
