@@ -378,16 +378,16 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         //   - RGUI:  1tap: one-shot RAlt  /  2tap: MouseLock  /  tap-tap-hold: momentary RAlt
         // - Keyboardio:
         //   - LGUI/RGUI:  hold: GUI  /  tap: one-shot Alt
-        #if !defined(USE_PALM) && defined(OLD_QMK)  // LGUI_T(KC_BTN1) didn't work until 2022-11-27 / QMK 19.0
+        #if !defined(USE_PALM) && defined(OLD_QMK)  // LGUI_T(MS_BTN1) didn't work until 2022-11-27 / QMK 19.0
         case TK_LGUI:
             switch (record->tap.count) {
                 case 0:  // LGUI hold
                     return true;  // QMK can handle it
                 default:  // mouse click afterward
                     if (record->event.pressed) {
-                        register_code(KC_BTN1);
+                        register_code(MS_BTN1);
                     } else {
-                        unregister_code(KC_BTN1);
+                        unregister_code(MS_BTN1);
                     }
                     return false;
             }
