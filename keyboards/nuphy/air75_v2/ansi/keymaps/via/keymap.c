@@ -16,6 +16,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include QMK_KEYBOARD_H
+#include "user_kb.h"
+
+#define LAYER_MAC  0
+#define LAYER_WIN  2
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
@@ -64,3 +68,18 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     _______,                LINK_TO,    _______,   RGB_TEST,   _______,     _______,   _______,    _______,     SIDE_SPD,  SIDE_SPI,   _______,                 _______,    SIDE_VAI,   _______,
     _______,    _______,    _______,                                        _______,                            _______,   MO(4),      _______,                 SIDE_MOD,	SIDE_VAD,   SIDE_HUI)
 };
+
+bool dip_switch_update_user(uint8_t index, bool active) {
+    // the toggle switch moved (next to the USB port)
+    if (0 == index) {  // switch 0 is the Mac/Win switch
+        if (DIPSWITCH_MAC == active) {
+            default_layer_set(1 << LAYER_MAC);
+            keymap_config.nkro = 0;
+        } else {
+            default_layer_set(1 << LAYER_WIN);
+            keymap_config.nkro = 1;
+        }
+    }
+    // don't process again in parent code
+    return false;
+}

@@ -11,7 +11,7 @@
 
 #define HAS_RGB
 // FIXME: Nuphy dip switches don't use standard QMK methods; need to override Nuphy's hardcoded handlers
-//#define HAS_DIPSWITCH
+#define HAS_DIPSWITCH
 #define HAS_F_ROW
 #define USE_NUMPAD
 //#define USE_CAPSWORD_KLUDGE  // improve CapsWord when host remaps the keys?
@@ -51,7 +51,7 @@
     #undef ENABLE_RGB_MATRIX_BAND_VAL
     #undef ENABLE_RGB_MATRIX_BREATHING
     #undef ENABLE_RGB_MATRIX_CYCLE_ALL
-    #undef ENABLE_RGB_MATRIX_CYCLE_LEFT_RIGHT
+    //#undef ENABLE_RGB_MATRIX_CYCLE_LEFT_RIGHT
     #undef ENABLE_RGB_MATRIX_CYCLE_OUT_IN
     #undef ENABLE_RGB_MATRIX_CYCLE_OUT_IN_DUAL
     #undef ENABLE_RGB_MATRIX_CYCLE_PINWHEEL

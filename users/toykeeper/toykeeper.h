@@ -163,7 +163,6 @@ void nuphy_indicators_user(void);
 #define TK_RCLK  KC_RCTL
 
 // legacy mouse events from old QMK
-/*
 #ifndef KC_MS_U
 #define KC_MS_U  MS_UP
 #define KC_MS_D  MS_DOWN
@@ -183,7 +182,6 @@ void nuphy_indicators_user(void);
 #define KC_BTN8  MS_BTN8
 #define KC_BTN9  MS_BTN9
 #endif
-*/
 
 // legacy RGB controls from old QMK
 #ifndef RGB_TOG

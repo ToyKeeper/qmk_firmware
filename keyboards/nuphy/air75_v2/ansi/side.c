@@ -134,7 +134,7 @@ void side_rgb_refresh(void) {
  */
 void side_light_control(uint8_t dir) {
     if (dir) {
-        if (kb_config.side_light == SIDE_BRIGHT_MAX) {
+        if (kb_config.side_light >= SIDE_BRIGHT_MAX) {
             return;
         }
         kb_config.side_light++;
@@ -467,11 +467,13 @@ static void side_static_mode_show(void) {
  * @brief  side_off_mode_show.
  */
 static void side_off_mode_show(void) {
+    /*
     r_temp = 0x00;
     g_temp = 0x00;
     b_temp = 0x00;
 
     side_rgb_set_color_all(r_temp, g_temp, b_temp);
+    */
 }
 
 /**
@@ -608,7 +610,9 @@ void bat_led_show(void) {
             g_temp = 0x40;
             b_temp = 0x00;
             count_rgb_light(breathe_data_tab[play_point]);
-            set_right_rgb(r_temp, g_temp, b_temp);
+            //set_right_rgb(r_temp, g_temp, b_temp);
+            side_rgb_set_color(6, r_temp, g_temp, b_temp);  // right top LED
+            side_rgb_set_color(7, 0, 0, 0);                 // one LED lower
         } else {
             bat_percent_led();
         }

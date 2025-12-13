@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "usb_main.h"
 #include "mcu_pwr.h"
 #include "color.h"
+#include "quantum/dip_switch.h"
 
 kb_config_t     kb_config;
 DEV_INFO_STRUCT dev_info = {
@@ -140,11 +141,11 @@ void long_press_key(void) {
             device_reset_init();
 
             if (dev_info.sys_sw_state == SYS_SW_MAC) {
-                default_layer_set(1 << 0);
-                keymap_config.nkro = 0;
+                // let user keymap handle dipswitch change
+                dip_switch_update_user(0, DIPSWITCH_MAC);
             } else {
-                default_layer_set(1 << 2);
-                keymap_config.nkro = 1;
+                // let user keymap handle dipswitch change
+                dip_switch_update_user(0, DIPSWITCH_WIN);
             }
         }
     } else {
@@ -272,18 +273,18 @@ void dial_sw_scan(void) {
     if (dial_scan & 0x02) {
         if (dev_info.sys_sw_state != SYS_SW_MAC) {
             f_sys_show = 1;
-            default_layer_set(1 << 0);
             dev_info.sys_sw_state = SYS_SW_MAC;
             break_all_key();
-            keymap_config.nkro = 0;
+            // let user keymap handle dipswitch change
+            dip_switch_update_user(0, DIPSWITCH_MAC);
         }
     } else {
         if (dev_info.sys_sw_state != SYS_SW_WIN) {
             f_sys_show = 1;
-            default_layer_set(1 << 2);
             dev_info.sys_sw_state = SYS_SW_WIN;
             break_all_key();
-            keymap_config.nkro = 1;
+            // let user keymap handle dipswitch change
+            dip_switch_update_user(0, DIPSWITCH_WIN);
         }
     }
 
@@ -345,16 +346,16 @@ void dial_sw_fast_scan(void) {
     if (dial_scan_sys) {
         if (dev_info.sys_sw_state != SYS_SW_MAC) {
             break_all_key();
-            default_layer_set(1 << 0);
             dev_info.sys_sw_state = SYS_SW_MAC;
-            keymap_config.nkro    = 0;
+            // let user keymap handle dipswitch change
+            dip_switch_update_user(0, DIPSWITCH_MAC);
         }
     } else {
         if (dev_info.sys_sw_state != SYS_SW_WIN) {
             break_all_key();
-            default_layer_set(1 << 2);
             dev_info.sys_sw_state = SYS_SW_WIN;
-            keymap_config.nkro    = 1;
+            // let user keymap handle dipswitch change
+            dip_switch_update_user(0, DIPSWITCH_WIN);
         }
     }
 }
@@ -514,6 +515,7 @@ void led_power_handle(void) {
         if (rgb_matrix_is_enabled() && rgb_matrix_get_val() != 0) {
             pwr_rgb_led_on();
         } else { // brightness is 0 or RGB off.
+            // FIXME: this shuts off the LEDs when it shouldn't
             pwr_rgb_led_off();
         }
     }

@@ -154,6 +154,6 @@
 #endif
 
 #ifndef DONT_USE_EEPROM
-    #define EECONFIG_USER_DATA_SIZE 4
+    //#define EECONFIG_USER_DATA_SIZE 4
 #endif
 

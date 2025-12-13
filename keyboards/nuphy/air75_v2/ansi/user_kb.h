@@ -92,6 +92,8 @@ typedef enum {
 
 #define SYS_SW_WIN              0xa1
 #define SYS_SW_MAC              0xa2
+#define DIPSWITCH_MAC           0
+#define DIPSWITCH_WIN           1
 
 #define RF_LINK_SHOW_TIME       300
 

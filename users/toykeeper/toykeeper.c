@@ -231,7 +231,7 @@ void set_df_layer(uint8_t layer) {
     // (avoid unnecessary eep writes)
     if (prev_layer != layer) {
         if (boot_complete) {
-            eeconfig_update_user_datablock(&user_config);
+            eeconfig_update_user(user_config.raw);
         }
     }
     #endif  // ifndef DONT_USE_EEPROM
@@ -274,7 +274,7 @@ bool dip_switch_update_user(uint8_t index, bool active) {
 #ifndef DONT_USE_EEPROM
 void keyboard_post_init_user(void) {
     // on boot, load the user config from persistent storage
-    eeconfig_read_user_datablock(&user_config);
+    user_config.raw = eeconfig_read_user();
 
     #ifdef HAS_DIPSWITCH
         // ... and restore the last-used layout
@@ -325,7 +325,7 @@ void eeconfig_init_user(void) {
         user_config.bat_show = 1;
     #endif
 
-    eeconfig_update_user_datablock(&user_config);
+    eeconfig_update_user(user_config.raw);
 }
 #endif  // ifndef DONT_USE_EEPROM
 
@@ -342,7 +342,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                             "[" QMK_KEYBOARD ":" QMK_KEYMAP "]"
                             ", Build date " QMK_BUILDDATE
                             ", Keymap: " KEYMAP_URL,
-                            10);
+                            16);
             }
             return false;
         #endif  // ifndef DONT_USE_TK_INFO
@@ -351,8 +351,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case TK_RGBT:
             if (record->event.pressed) {
                 user_config.rgb_enabled = (! user_config.rgb_enabled);
-                //eeconfig_update_user(user_config.raw);
-                eeconfig_update_user_datablock(&user_config);
+                eeconfig_update_user(user_config.raw);
                 apply_rgb_enabled();
             }
             return true;
@@ -528,7 +527,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case TK_IUUI:  // toggle whether U and I are swapped in dvorak layer
             if (record->event.pressed) {
                 user_config.dvoriuk = !user_config.dvoriuk;
-                eeconfig_update_user_datablock(&user_config);
+                eeconfig_update_user(user_config.raw);
             }
             break;
 
@@ -557,7 +556,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case TG(L_FLCK):  // remember F-Lock setting between boots
             if (record->event.pressed) {
                 user_config.f_lock = !(IS_LAYER_ON(L_FLCK));  // invert because layer hasn't been toggled yet
-                eeconfig_update_user_datablock(&user_config);
+                eeconfig_update_user(user_config.raw);
             }
             return true;  // let QMK do the rest
         #endif  // ifdef HAS_F_ROW
@@ -571,7 +570,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case TK_BAT:  // show battery charge level ALL THE TIME on side LEDs
             if (record->event.pressed) {
                 user_config.bat_show = !user_config.bat_show;
-                eeconfig_update_user_datablock(&user_config);
+                eeconfig_update_user(user_config.raw);
             }
             return false;
         #endif
