@@ -105,7 +105,16 @@ enum my_keycodes {
     // other custom keys
     TK_IUUI,  // toggle U/I swap on dvorak layer
     TK_ANY,   // the "Any" key, spits out random characters
+    #ifdef IS_NUPHY_AIR75v2
+    TK_BAT,   // show battery charge level on side LEDs
+    TK_BNOW,  // show battery charge level on number keys
+    #endif
 };
+
+#ifdef IS_NUPHY_AIR75v2
+bool tk_bat_momentary;
+void nuphy_indicators_user(void);
+#endif
 
 // custom keys which don't need a custom enum
 #ifdef USE_PALM
@@ -141,6 +150,10 @@ enum my_keycodes {
 #define TK_RALT  RALT_T(TK_WARP)       // RALT / Warp
 #define TK_SESC  S(KC_ESC)
 #define TK_SINS  S(KC_INS)
+#define TK_PLUS  S(KC_EQUAL)
+#define TK_ASTR  S(KC_8)
+#define TK_LPAR  S(KC_9)
+#define TK_RPAR  S(KC_0)
 #define TK_WARP  KC_F23  // mouse warp, handled by host OS
 #define TK_BSTG  BS_TOGG
 #ifndef BS_TOGG
@@ -164,10 +177,15 @@ typedef union {
             unsigned f_lock     : 1;  // is F-Lock active?
         #endif
         #ifndef DONT_USE_TK_IUUI
-            unsigned dvoriuk        : 1;  // swap U and I in dvorak layer?
+            unsigned dvoriuk    : 1;  // swap U and I in dvorak layer?
+        #endif
+        #ifdef IS_NUPHY_AIR75v2
+            unsigned bat_show   : 1;  // show battery status on side LEDs
         #endif
     };
 } user_config_t;
 //#define EECONFIG_USER_DATA_SIZE sizeof(user_config_t)
+
+user_config_t user_config;
 #endif  // ifndef DONT_USE_EEPROM
 

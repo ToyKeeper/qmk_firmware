@@ -78,7 +78,6 @@ __attribute__ ((weak)) const uint8_t mod_indicator_coords[][3] = {
 #endif
 
 #ifndef DONT_USE_EEPROM
-user_config_t user_config;
 uint8_t boot_complete = 0;
 #endif
 
@@ -180,6 +179,10 @@ rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
         }
     }
 
+    #ifdef IS_NUPHY_AIR75v2
+    nuphy_indicators_user();
+    #endif  // ifdef IS_NUPHY_AIR75v2
+
     #ifndef OLD_QMK
     return false;
     #endif
@@ -256,7 +259,6 @@ bool dip_switch_update_user(uint8_t index, bool active) {
 #ifndef DONT_USE_EEPROM
 void keyboard_post_init_user(void) {
     // on boot, load the user config from persistent storage
-    //user_config.raw = eeconfig_read_user();
     eeconfig_read_user_datablock(&user_config);
 
     #ifdef HAS_DIPSWITCH
@@ -289,7 +291,10 @@ void eeconfig_init_user(void) {
         user_config.f_lock = 0;      // regular F1-F12 keys by default
     #endif
     #ifndef DONT_USE_TK_IUUI
-        user_config.dvoriuk = 0;         // don't swap keys on dvorak layer
+        user_config.dvoriuk = 0;     // don't swap keys on dvorak layer
+    #endif
+    #ifdef IS_NUPHY_AIR75v2
+        user_config.bat_show = 1;    // show battery charge on side LEDs
     #endif
 
     eeconfig_update_user_datablock(&user_config);
@@ -305,11 +310,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         // show build info / version
         case TK_INFO:
             if (record->event.pressed) {
-                SEND_STRING("QMK " QMK_VERSION " "
+                SEND_STRING_DELAY("QMK " QMK_VERSION " "
                             "[" QMK_KEYBOARD ":" QMK_KEYMAP "]"
                             ", Build date " QMK_BUILDDATE
-                            ", Keymap: " KEYMAP_URL
-                            );
+                            ", Keymap: " KEYMAP_URL,
+                            10);
             }
             return false;
         #endif  // ifndef DONT_USE_TK_INFO
@@ -551,6 +556,20 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return true;  // let QMK do the rest
         #endif  // ifdef HAS_F_ROW
+
+        #ifdef IS_NUPHY_AIR75v2
+        case TK_BNOW:  // show battery charge level NOW on number keys
+            // display only while pressed
+            tk_bat_momentary = !(!(record->event.pressed));
+            return false;
+
+        case TK_BAT:  // show battery charge level ALL THE TIME on side LEDs
+            if (record->event.pressed) {
+                user_config.bat_show = !user_config.bat_show;
+                eeconfig_update_user_datablock(&user_config);
+            }
+            return false;
+        #endif
 
     }
     return true;  // send un-handled events to parent for processing

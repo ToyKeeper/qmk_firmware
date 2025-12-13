@@ -485,6 +485,7 @@ static void side_static_mode_show(void) {
  * @brief  side_off_mode_show.
  */
 static void side_off_mode_show(void) {
+    #if 0
     if (side_play_cnt <= side_speed_table[side_mode][side_speed])
         return;
     else
@@ -500,6 +501,7 @@ static void side_off_mode_show(void) {
             side_rgb_set_color(side_led_index_tab[i][j], r_temp >> 2, g_temp >> 2, b_temp >> 2);
         }
     }
+    #endif
 }
 
 /**
@@ -554,46 +556,17 @@ void rf_led_show(void) {
  */
 void bat_num_led(uint8_t bat_percent)
 {
-    /*
-    uint8_t r, g, b;
-
-    // set color
-    if (bat_percent <= 15) {
-        r = 0xff; g = 0x00; b = 0x00;
-    }
-    else if (bat_percent <= 50) {
-        r = 0xff; g = 0x40; b = 0x00;
-    }
-    else if (bat_percent <= 80) {
-        r = 0xff; g = 0xff; b = 0x00;
-    }
-    else {
-        r = 0x00; g = 0xff; b = 0x00;
-    }
-
-    // set percent
-    if (bat_percent >= 1) rgb_matrix_set_color(29, r, g, b);
-    if (bat_percent > 10) rgb_matrix_set_color(28, r, g, b);
-    if (bat_percent > 20) rgb_matrix_set_color(27, r, g, b);
-    if (bat_percent > 30) rgb_matrix_set_color(26, r, g, b);
-    if (bat_percent > 40) rgb_matrix_set_color(25, r, g, b);
-    if (bat_percent > 50) rgb_matrix_set_color(24, r, g, b);
-    if (bat_percent > 60) rgb_matrix_set_color(23, r, g, b);
-    if (bat_percent > 70) rgb_matrix_set_color(22, r, g, b);
-    if (bat_percent > 80) rgb_matrix_set_color(21, r, g, b);
-    if (bat_percent > 90) rgb_matrix_set_color(20, r, g, b);
-    */
-
-    if (bat_percent >= 1) rgb_matrix_set_color(29, 255,   0,   0);
-    if (bat_percent > 10) rgb_matrix_set_color(28, 255, 128,   0);
-    if (bat_percent > 20) rgb_matrix_set_color(27, 255, 255,   0);
-    if (bat_percent > 30) rgb_matrix_set_color(26, 128, 255,   0);
-    if (bat_percent > 40) rgb_matrix_set_color(25,   0, 255,   0);
-    if (bat_percent > 50) rgb_matrix_set_color(24,   0, 255, 128);
-    if (bat_percent > 60) rgb_matrix_set_color(23,   0, 255, 255);
-    if (bat_percent > 70) rgb_matrix_set_color(22,   0, 128, 255);
-    if (bat_percent > 80) rgb_matrix_set_color(21,   0,   0, 255);
-    if (bat_percent > 90) rgb_matrix_set_color(20, 255,   0, 255);
+    // display battery status on number keys 1-0
+    if (bat_percent >= 1) rgb_matrix_set_color(29, 255,   0,   0);  // 1
+    if (bat_percent > 10) rgb_matrix_set_color(28, 255, 128,   0);  // 2
+    if (bat_percent > 20) rgb_matrix_set_color(27, 255, 255,   0);  // 3
+    if (bat_percent > 30) rgb_matrix_set_color(26, 128, 255,   0);  // 4
+    if (bat_percent > 40) rgb_matrix_set_color(25,   0, 255,   0);  // 5
+    if (bat_percent > 50) rgb_matrix_set_color(24,   0, 255, 128);  // 6
+    if (bat_percent > 60) rgb_matrix_set_color(23,   0, 255, 255);  // 7
+    if (bat_percent > 70) rgb_matrix_set_color(22,   0, 128, 255);  // 8
+    if (bat_percent > 80) rgb_matrix_set_color(21,   0,   0, 255);  // 9
+    if (bat_percent > 90) rgb_matrix_set_color(20, 255,   0, 255);  // 0
 }
 
 void num_led_show(void)
@@ -717,7 +690,11 @@ void bat_led_show(void) {
             g_temp = 0x40;
             b_temp = 0x00;
             count_rgb_light(breathe_data_tab[play_point]);
-            set_right_rgb(r_temp, g_temp, b_temp);
+            // entire light bar
+            //set_right_rgb(r_temp, g_temp, b_temp);
+            // top LED only
+            side_rgb_set_color(6, r_temp >> 2, g_temp >> 2, b_temp >> 2);
+            side_rgb_set_color(7, 0, 0, 0);  // one black pixel between this indicator and the rest
         } else {
             bat_percent_led(bat_percent);
         }

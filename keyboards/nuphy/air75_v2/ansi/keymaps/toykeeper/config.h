@@ -7,6 +7,8 @@
 
 ///// personal config stuff /////
 
+#define IS_NUPHY_AIR75v2
+
 #define HAS_RGB
 // FIXME: Nuphy dip switches don't use standard QMK methods; need to override Nuphy's hardcoded handlers
 //#define HAS_DIPSWITCH
