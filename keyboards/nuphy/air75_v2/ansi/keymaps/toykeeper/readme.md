@@ -48,24 +48,25 @@ Things which differ from other models:
       fancy keycodes.  The default is "fancy" keycodes, but they can change
       this by pressing the F-Lock key.
 
-  * Dipswitch (FIXME)
+  * Dipswitch
     * Two core layouts can be saved for easy access with the dipswitch.  Each
       dipswitch position is treat as a "save slot".  Any time the user changes
       the core layout via a hotkey, it is saved to the current slot.  Then it
       can be activated later simply by flipping the switch to that position.
-      (Currently broken, so the layer-select dipswitch is disabled)
 
 
 ## Known Issues
 
+The `tk-jincao1` branch generally works pretty well.
+
+The `tk-nuphy` branch is based on Nuphy's fork, which has unfixed problems:
+
   * The dipswitches don't use standard QMK APIs, so my usual dipswitch handler
-    doesn't work.  I'm undecided about whether to fix this, because it's not
-    very important.
+    doesn't work.  I fixed this in my tk-jincao1 branch.
 
   * MouseKeys are nearly unusable in wireless mode, for unknown reasons.  They
     trigger way too many times in a single keypress, and when held, they send
-    events way too fast.  Hoping to fix this, because it's important to be able
-    to use the mouse in wireless mode.
+    events way too fast.  Fixed in jincao1's fork.
 
 
 ## More Pics
