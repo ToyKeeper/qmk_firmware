@@ -18,16 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include QMK_KEYBOARD_H
 #include "user_kb.h"
 
-#define LAYER_MAC     0
-#define LAYER_MAC_FN  1
-#define LAYER_WIN     2
-#define LAYER_WIN_FN  3
-#define LAYER_CFG     4
-#define L_MAC  LAYER_MAC
-#define L_MFN  LAYER_MAC_FN
-#define L_WIN  LAYER_WIN
-#define L_WFN  LAYER_WIN_FN
-#define L_CFG  LAYER_CFG
+enum {
+    L_MAC = 0,  // Mac layer
+    L_MFN,      // Mac Fn layer
+    L_WIN,      // Win layer
+    L_WFN,      // Win Fn layer
+    L_CFG,      // misc config layer
+};
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
@@ -81,10 +78,10 @@ bool dip_switch_update_user(uint8_t index, bool active) {
     // a dip switch moved
     if (0 == index) {  // switch 0 is the Mac/Win switch
         if (DIPSWITCH_MAC == active) {
-            default_layer_set(1 << LAYER_MAC);
+            default_layer_set(1 << L_MAC);
             keymap_config.nkro = 0;
         } else {
-            default_layer_set(1 << LAYER_WIN);
+            default_layer_set(1 << L_WIN);
             keymap_config.nkro = 1;
         }
     }
