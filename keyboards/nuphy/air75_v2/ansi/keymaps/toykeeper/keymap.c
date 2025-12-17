@@ -4,13 +4,21 @@
  */
 
 // TODO:
-// - try jincao1's fork
+// * try jincao1's fork
 //   - LINK_TO: link timeout toggle between short and long (saved in eeprom)
 //   + KB_SLP: sleep timeout toggle between short and long (this boot only)
 //   S DB_TOGG: toggle QMK Debug Mode
 //   - led_power_handle() needs to allow my indicators
 //   - add tenths + ones display for battery level
 //   * fix or disable the dipswitch (fixed)
+//   F figure out how to get actual battery voltage, and display that
+//     (it seems the proprietary RF chip measures battery voltage,
+//      and doesn't share that info with QMK ... it only shares a "percent")
+//   - enter sleep mode sooner by default
+//   * fade the top LED in the side strip along with battery level
+//     (for higher display resolution and smoother animations)
+//   * reduce brightness of Moon/Star layers, and maybe others
+//     (to reduce battery use)
 // * fix mousekeys going WAY too fast in wireless mode (jincao1's fork fixed it)
 // * fix build-info key dropping keystrokes in wireless mode
 // * tap Moon for left click
@@ -119,11 +127,30 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     QK_BOOT, KC_BRID, KC_BRIU, _______, _______, _______, _______, KC_MPRV, KC_MPLY, KC_MNXT, KC_MUTE, KC_VOLD, KC_VOLU, KC_INS , TK_SINS, _______,
     LNK_RF , LNK_BLE1,LNK_BLE2,LNK_BLE3,RF_DFU , KC_F15 , KC_F16 , KC_F17 , KC_F18 , KC_F19 , KC_F20 , KC_F21 , KC_F22 ,       KC_DEL ,    KC_F14 ,
     TK_INFO,    _______, _______, _______,DEV_RESET,_______, _______, _______, _______, _______, _______, _______, _______,    TK_BNOW,    KC_F13 ,
-    KC_CAPS,       RGB_HUI, RGB_SAI, RGB_VAI, _______, TK_IUUI, _______, SIDE_HUI,SIDE_VAD,SIDE_VAI, _______, BAT_SHOW,        TK_BAT ,    KC_WSCH,
+    KC_CAPS,       RGB_HUI, RGB_SAI, RGB_VAI, _______, TK_IUUI, _______, SIDE_HUI,SIDE_VAD,SIDE_VAI, _______, _______,         TK_BAT ,    KC_WSCH,
     TK_DF_3,          RGB_MOD, RGB_SPI, _______, _______, _______, NK_TOGG, SIDE_MOD,SIDE_SPI,KB_SLP , SLEEP_MODE,   _______,     KC_PGUP, KC_MYCM,
     TK_DF_0,  TK_DF_1,  TK_DF_2,                          TK_RGBT,                            KC_APP , _______, _______, KC_HOME, KC_PGDN, KC_END
     ),
 
+};
+
+// highlight color for each layer while active
+// (would use the defaults, but they're a bit bright on this board,
+//  so I dimmed it to reduce battery use)
+const uint8_t layer_colors[][3] = {
+    [L_QWERTY  ] = {  0,  0,  0},
+    [L_DVORAK  ] = {  0,  0,  0},
+    [L_UNDVORAK] = {  0,  0,  0},
+    [L_COLEMAK ] = {  0,  0,  0},
+    #ifdef USE_NUMPAD
+    [L_NUMPAD  ] = {128,  0,  0},
+    #endif
+    #ifdef HAS_F_ROW
+    [L_FLCK    ] = { 50, 10,  0},  // yellow
+    #endif
+    [L_MOUSE   ] = {128,  0,  8},  // bubble gum pink
+    [L_FN1     ] = {128,  0, 40},  // neon purple-ish
+    [L_FN2     ] = {  0, 30, 15},  // teal
 };
 
 const uint8_t layer_indicator_colors[][6] = {
@@ -158,27 +185,75 @@ combo_t key_combos[COMBO_COUNT] = {
 
 // import these from vendor's keyboard code
 extern DEV_INFO_STRUCT dev_info;
+uint8_t bat_px = 100;
 void side_rgb_set_color(int index, uint8_t red, uint8_t green, uint8_t blue);
+
+bool update_bat_pct_user(uint8_t bat_percent) {
+    uint8_t plugged_in = !(!(dev_info.rf_charge & 0x01));
+    uint8_t charging_now = !(!(dev_info.rf_charge & 0x02));
+    // percent value is either 0 or 100 when plugged in,
+    // and both are useless... so don't update it
+    if (plugged_in) {
+        if (charging_now) {
+            // do a "filling up" animation
+            bat_px = (bat_px + 1) % 100;
+        } else {
+            bat_px = 100;
+        }
+    } else {
+        bat_px = bat_percent;
+    }
+    nuphy_indicators_user();
+    return true;  // allow kb bat_pct stuff to run too
+}
 
 // show battery and charge state on side LEDs and number keys
 void nuphy_indicators_user(void) {
-    // display battery status on number keys 1-0
+    // display battery status on number keys and side LEDs
     static uint8_t bat_percent = 0;
-    bat_percent = dev_info.rf_battery;
+    //bat_percent = dev_info.rf_battery;
+    bat_percent = bat_px;
     uint8_t plugged_in = !(!(dev_info.rf_charge & 0x01));
-    uint8_t charging_now = !(dev_info.rf_charge & 0x02);
-    uint8_t numkey_bat[][5] = {
-        // px, key,  r,   g,   b
-        {  1, 29,  255,   0,   0 },  // 1
-        { 10, 28,  255,  20,   0 },  // 2
-        { 20, 27,  255,  60,   0 },  // 3
-        { 30, 26,  255, 128,   0 },  // 4
-        { 40, 25,    0, 255,   0 },  // 5
-        { 50, 24,    0, 255,  96 },  // 6
-        { 60, 23,    0, 255, 255 },  // 7
-        { 70, 22,    0,  96, 255 },  // 8
-        { 80, 21,    0,   0, 255 },  // 9
-        { 90, 20,  255,   0,  80 },  // 0
+    uint8_t charging_now = !(!(dev_info.rf_charge & 0x02));
+    uint8_t bat_colors[][3] = {
+        // r,   g,   b
+        { 255,   0,   0 },  // 0-9
+        { 255,  20,   0 },  // 10-19
+        { 255,  60,   0 },  // 20-29
+        { 255, 128,   0 },  // 30-39
+        {   0, 255,   0 },  // 40-49
+        {   0, 255,  96 },  // 50-59
+        {   0, 255, 255 },  // 60-69
+        {   0,  96, 255 },  // 70-79
+        {   0,   0, 255 },  // 80-89
+        { 255,   0,  80 },  // 90-100
+    };
+    uint8_t bat_fkey[][4] = {
+        // px, key,  color
+        //{   0,  0,  0 },  // Esc
+        {  10,  1,  0 },  // F1
+        {  20,  2,  1 },  // F2
+        {  30,  3,  2 },  // F3
+        {  40,  4,  3 },  // F4
+        {  50,  5,  4 },  // F5
+        {  60,  6,  5 },  // F6
+        {  70,  7,  6 },  // F7
+        {  80,  8,  7 },  // F8
+        {  90,  9,  8 },  // F9
+        { 100, 10,  9 },  // F10
+    };
+    uint8_t bat_numkey[][5] = {
+        // px, key,  color
+        {  1, 29,  0 },  // 1
+        {  2, 28,  1 },  // 2
+        {  3, 27,  2 },  // 3
+        {  4, 26,  3 },  // 4
+        {  5, 25,  4 },  // 5
+        {  6, 24,  5 },  // 6
+        {  7, 23,  6 },  // 7
+        {  8, 22,  7 },  // 8
+        {  9, 21,  8 },  // 9
+        {  0, 20,  9 },  // 0
     };
     // ensure RGB is on when needed
     if (tk_bat_momentary || user_config.bat_show) {
@@ -186,16 +261,32 @@ void nuphy_indicators_user(void) {
         pwr_rgb_led_on();
     }
 
-    //if (f_bat_num_show) {
+    // display battery percent on F1-F10 keys (tens digit) and 0-9 keys (ones digit)
+    // while the user is holding the TK_BNOW key
     if (tk_bat_momentary) {
-        uint8_t px, key, r, g, b;
+        uint8_t ones = bat_percent % 10;
+        uint8_t px, key, color, r, g, b;
+        // Esc + F1-F10 row for tens digit
         for (uint8_t i=0; i<10; i++) {
-            px  = numkey_bat[i][0];
-            key = numkey_bat[i][1];
-            r   = numkey_bat[i][2];
-            g   = numkey_bat[i][3];
-            b   = numkey_bat[i][4];
+            px    = bat_fkey[i][0];
+            key   = bat_fkey[i][1];
+            color = bat_fkey[i][2];
+            r     = bat_colors[color][0];
+            g     = bat_colors[color][1];
+            b     = bat_colors[color][2];
             if (bat_percent >= px) rgb_matrix_set_color(key, r, g, b);
+            else rgb_matrix_set_color(key, 0, 0, 0);
+        }
+        // 1-0 row for ones digit
+        for (uint8_t i=0; i<10; i++) {
+            px    = bat_numkey[i][0];
+            key   = bat_numkey[i][1];
+            color = bat_numkey[i][2];
+            r     = bat_colors[color][0];
+            g     = bat_colors[color][1];
+            b     = bat_colors[color][2];
+            if (ones == px) rgb_matrix_set_color(key, r, g, b);
+            else rgb_matrix_set_color(key, 0, 0, 0);
         }
     }
     // side LEDs are 2 sets of 6, numbered 0 to 11
@@ -203,34 +294,40 @@ void nuphy_indicators_user(void) {
     // 0 to 5 on the left going up, then 6 to 11 on the right going down
     #define NUM_SIDE_LEDS  6
     // reduce brightness of side LEDs by this many powers of two:
-    #define RS_DIM  (3 - plugged_in - charging_now)  // brighter while plugged in and charging
-    #define LS_DIM  (1 - (2*charging_now))
+    #define RS_DIM  (4 - plugged_in - charging_now)  // brighter while plugged in and charging
+    #define LS_DIM  (2 - (2*charging_now))
     if (user_config.bat_show) {
-        uint8_t side_bat[NUM_SIDE_LEDS][4] = {
+        uint8_t side_bat[][4] = {
             // px,  r, g, b
-            { 5,  63,  0,  0},
+            { 1,  63,  0,  0},
             {17,  63, 32,  0},
             {33,   0, 63,  0},
             {50,   0, 63, 63},
             {67,   0,  0, 63},
-            {83,  63,  0, 32},
+            {83,  63,  0, 16},
+            {101, 63, 63, 63},  // should never light up; used only for next_px
         };
         for (uint8_t led = 0; led < NUM_SIDE_LEDS; led ++) {
             uint8_t left = 5 - led;  // top to bottom rainbow
             uint8_t right = 11 - led;  // bottom to top rainbow
             uint8_t px = side_bat[led][0];
-            if (bat_percent > px) {
+            uint8_t next_px = side_bat[led+1][0];
+            uint8_t r = side_bat[led][1];
+            uint8_t g = side_bat[led][2];
+            uint8_t b = side_bat[led][3];
+            if (bat_percent >= px) {
+                // dim the final LED based on how full it is
+                if (bat_percent < next_px) {
+                    uint8_t ratio = 256 * (uint16_t)(bat_percent - px) / (next_px - px);
+                    r = (uint16_t)r * ratio / 256;
+                    g = (uint16_t)g * ratio / 256;
+                    b = (uint16_t)b * ratio / 256;
+                }
                 // right side: bottom=red, top=blue/purple (held charge)
-                side_rgb_set_color(right,
-                        side_bat[led][1] >> RS_DIM,
-                        side_bat[led][2] >> RS_DIM,
-                        side_bat[led][3] >> RS_DIM);
+                side_rgb_set_color(right, r >> RS_DIM, g >> RS_DIM, b >> RS_DIM);
                 // left side: top=red, bottom=blue/purple (incoming power)
                 if (plugged_in) {
-                    side_rgb_set_color(left,
-                            side_bat[led][1] >> LS_DIM,
-                            side_bat[led][2] >> LS_DIM,
-                            side_bat[led][3] >> LS_DIM);
+                    side_rgb_set_color(left, r >> LS_DIM, g >> LS_DIM, b >> LS_DIM);
                 } else {
                     // only light up while plugged in
                     side_rgb_set_color(left, 0, 0, 0);
