@@ -443,11 +443,34 @@ void bat_pct_led_kb(void) {
 }
 
 /**
+ * @brief Sets current bat percentage and notifies observers.
+ */
+void update_bat_pct(uint8_t bat_percent) {
+    // user handler can decide whether kb handler runs
+    if (update_bat_pct_user(bat_percent)) {
+        update_bat_pct_rgb(bat_percent);
+    }
+}
+
+/**
+ * @brief Override this in the user keymap for custom battery percent handling.
+ */
+__attribute__ ((weak)) bool update_bat_pct_user(uint8_t bat_percent) {
+    return true;  // true = let kb handler run too
+}
+
+/**
  * @brief Updates RGB value and sets current bat percentage.
  */
 void update_bat_pct_rgb(uint8_t bat_percent) {
     static uint8_t  bat_pct          = 0;
     static uint32_t bat_per_debounce = 0;
+    uint8_t plugged_in = !(!(dev_info.rf_charge & 0x01));
+
+    // when power is plugged in, the incoming "bat_percent" value is zero :(
+    if (plugged_in) {
+        bat_percent = 100;
+    }
 
     if (bat_percent > 100) {
         bat_percent = 100;

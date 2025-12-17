@@ -187,6 +187,8 @@ void    side_mode_control(uint8_t dir);
 void    side_led_show(void);
 void    sleep_handle(void);
 void    bat_pct_led_kb(void);
+void    update_bat_pct(uint8_t bat_percent);
+bool    update_bat_pct_user(uint8_t bat_percent);
 void    update_bat_pct_rgb(uint8_t bat_percent);
 void    rgb_test_show(void);
 void    gpio_init(void);

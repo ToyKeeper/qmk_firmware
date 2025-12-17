@@ -222,10 +222,9 @@ void rf_protocol_receive(void) {
 
                     dev_info.rf_charge = Usart_Mgr.RXDBuf[7];
                     uint8_t bat_pct    = Usart_Mgr.RXDBuf[8];
-                    if (dev_info.rf_charge & 0x01) bat_pct = 100;
-                    if (bat_pct > 0 && bat_pct <= 100) {
-                        update_bat_pct_rgb(bat_pct);
-                    }
+                    // send raw value; don't try to interpret it
+                    // (when power is plugged in, the incoming percent value is zero)
+                    update_bat_pct(bat_pct);
                 } else {
                     if (dev_info.rf_state != RF_INVAILD) {
                         if (error_cnt >= 5) {
