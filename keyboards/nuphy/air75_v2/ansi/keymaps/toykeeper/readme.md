@@ -40,8 +40,20 @@ Things which differ from other models:
       red is at the top and purple is at the bottom.
     * The side LED power displays change in brightness depending on whether the
       device is currently plugged in, and whether it's actively charging.
+    * Side LEDs animate while the battery is charging.  The underlying hardware
+      doesn't provide accurate battery status during charging, so it just plays
+      an animation instead of showing how full the battery is.
     * The vendor's side LED functions sometimes override the power displays,
       like when it wants to indicate something about wireless status.
+    * Setup required: Set your side LED mode to "off" in order to allow the
+      battery indicator to work.  Then press Star+Enter to enable or disable
+      the side LED battery indicator.
+
+  * Detailed battery display:  Hold Star+Backslash to display the battery
+    fullness in percent, using the F1-F10 keys for the "tens" digit, and the
+    0-9 keys for the "ones" digit.  Colors follow the battery rainbow, and the
+    "tens" digit is cumulative, so 57% would light up F1 to F5, with the "7"
+    key also illuminated.
 
   * F1-F12 row
     * The user can choose whether the F1-F12 row emits normal keycodes or more
@@ -59,7 +71,13 @@ Things which differ from other models:
 
 The `tk-jincao1` branch generally works pretty well.
 
+  * I might abandon this branch soon, and move all the keyboard+keymap code
+    over to my qmk_userspace repo.  This would keep things nicely in one place,
+    and also allow updating to a newer QMK base more easily.
+
 The `tk-nuphy` branch is based on Nuphy's fork, which has unfixed problems:
+
+  * I've abandoned this branch and don't recommend using it.
 
   * The dipswitches don't use standard QMK APIs, so my usual dipswitch handler
     doesn't work.  I fixed this in my tk-jincao1 branch.
