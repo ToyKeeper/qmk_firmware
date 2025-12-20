@@ -207,6 +207,14 @@ bool update_bat_pct_user(uint8_t bat_percent) {
     return true;  // allow kb bat_pct stuff to run too
 }
 
+// divide value but don't reduce it below 1 if it wasn't already
+// result = value * (current - bottom) / (top - bottom)
+uint8_t dim(uint8_t value, uint8_t current, uint8_t top, uint8_t bottom) {
+    uint8_t min = !(!(value));  // don't reduce non-zero inputs to zero
+    value = (uint16_t)value * (current - bottom) / (top - bottom);
+    return value ? value : min;
+}
+
 // show battery and charge state on side LEDs and number keys
 void nuphy_indicators_user(void) {
     // display battery status on number keys and side LEDs
@@ -294,18 +302,21 @@ void nuphy_indicators_user(void) {
     // 0 to 5 on the left going up, then 6 to 11 on the right going down
     #define NUM_SIDE_LEDS  6
     // reduce brightness of side LEDs by this many powers of two:
-    #define RS_DIM  (4 - plugged_in - charging_now)  // brighter while plugged in and charging
-    #define LS_DIM  (2 - (2*charging_now))
+    #define RS_DIM  (5 - plugged_in - charging_now - tk_bat_momentary)  // brighter while plugged in and charging
+    #define LS_DIM  (3 - (2*charging_now))
     if (user_config.bat_show) {
+        // kb driver ">> 2"s these, so usable values go from 4 to 255, plus 0
+        // values 1,2,3 become 0
+        // (but it seems like values 4-7 don't actually light up, so maybe 8 is the true minimum?)
         uint8_t side_bat[][4] = {
             // px,  r, g, b
-            { 1,  63,  0,  0},
-            {17,  63, 32,  0},
-            {33,   0, 63,  0},
-            {50,   0, 63, 63},
-            {67,   0,  0, 63},
-            {83,  63,  0, 16},
-            {101, 63, 63, 63},  // should never light up; used only for next_px
+            { 1,  255,   0,   0},  // low bat: red
+            {17,  255, 128,   0},  // orange or yellow
+            {33,    0, 255,   0},  // green
+            {50,    0, 255, 255},  // cyan
+            {67,    0,   0, 255},  // blue
+            {83,  255,   0,  64},  // full bat: purple (mostly red, since it blends with blue LED next to it)
+            {101, 255, 255, 255},  // should never light up; used only for next_px
         };
         for (uint8_t led = 0; led < NUM_SIDE_LEDS; led ++) {
             uint8_t left = 5 - led;  // top to bottom rainbow
@@ -316,14 +327,13 @@ void nuphy_indicators_user(void) {
             uint8_t g = side_bat[led][2];
             uint8_t b = side_bat[led][3];
             if (bat_percent >= px) {
-                // dim the final LED based on how full it is
+                // dim the final active LED based on how full it is
                 if (bat_percent < next_px) {
-                    uint8_t ratio = 256 * (uint16_t)(bat_percent - px) / (next_px - px);
-                    r = (uint16_t)r * ratio / 256;
-                    g = (uint16_t)g * ratio / 256;
-                    b = (uint16_t)b * ratio / 256;
+                    r = dim(r, bat_percent, next_px, px);
+                    g = dim(g, bat_percent, next_px, px);
+                    b = dim(b, bat_percent, next_px, px);
                 }
-                // right side: bottom=red, top=blue/purple (held charge)
+                // right side: bottom=red, top=blue/purple (battery fullness)
                 side_rgb_set_color(right, r >> RS_DIM, g >> RS_DIM, b >> RS_DIM);
                 // left side: top=red, bottom=blue/purple (incoming power)
                 if (plugged_in) {
