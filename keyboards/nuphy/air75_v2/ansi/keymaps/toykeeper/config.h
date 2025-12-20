@@ -9,7 +9,9 @@
 
 #define IS_NUPHY_AIR75v2
 // in wireless mode, macros need to play slower
-#define DYNAMIC_MACRO_DELAY 16
+#define DYNAMIC_MACRO_DELAY  16
+// display a warning when battery is lower than this percent
+#define BAT_WARN_PERCENT  5
 
 #define HAS_RGB
 #define HAS_DIPSWITCH
@@ -17,9 +19,9 @@
 #define USE_NUMPAD
 
 ///// Chords / combos
-#define COMBO_COUNT 2
+#define COMBO_COUNT  2
 // ... and make it work regardless of what layout I'm using
-#define COMBO_ONLY_FROM_LAYER 0
+#define COMBO_ONLY_FROM_LAYER  0
 
 
 #ifdef HAS_RGB

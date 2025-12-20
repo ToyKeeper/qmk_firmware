@@ -219,6 +219,10 @@ uint8_t dim(uint8_t value, uint8_t current, uint8_t top, uint8_t bottom) {
 void nuphy_indicators_user(void) {
     // display battery status on number keys and side LEDs
     static uint8_t bat_percent = 0;
+    // crude frame counter for animation purposes
+    static uint16_t frame_counter = 0;
+    frame_counter ++;
+
     //bat_percent = dev_info.rf_battery;
     bat_percent = bat_px;
     uint8_t plugged_in = !(!(dev_info.rf_charge & 0x01));
@@ -297,6 +301,14 @@ void nuphy_indicators_user(void) {
             else rgb_matrix_set_color(key, 0, 0, 0);
         }
     }
+
+    // don't update the side LEDs as often
+    // (we seem to get about 256 "frames" per second, and don't need more than maybe 16 fps)
+    #define FRAME_MASK 0b00001111
+    if ((frame_counter & FRAME_MASK) != FRAME_MASK) {
+        return;
+    }
+
     // side LEDs are 2 sets of 6, numbered 0 to 11
     // and they go from bottom left to top left, then top right to bottom right
     // 0 to 5 on the left going up, then 6 to 11 on the right going down
@@ -352,6 +364,14 @@ void nuphy_indicators_user(void) {
         for (uint8_t led=0; led < (2*NUM_SIDE_LEDS); led ++) {
             side_rgb_set_color(led, 0, 0, 0);
         }
+    }
+
+    // low battery warning
+    if ((bat_percent <= BAT_WARN_PERCENT) && (! plugged_in)) {
+        // blink a red warning back and forth between both side LED strips
+        // (top LED on either side, blinks like a railroad crossing traffic light)
+        uint8_t which_led = 5 + (!(!(frame_counter & 0x0100)));
+        side_rgb_set_color(which_led, 64, 0, 0);
     }
 }
 

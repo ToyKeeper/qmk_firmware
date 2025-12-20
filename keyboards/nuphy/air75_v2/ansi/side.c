@@ -259,8 +259,9 @@ bool breath_tab_trend(bool trend, uint8_t playpoint) {
 }
 
 /**
- * @brief  set left side leds.
+ * @brief  blink right side LEDs when Mac/Win switch changes
  */
+#ifdef USE_KB_MACWIN_SW_LEDS
 void sys_sw_led_show(void) {
     static uint32_t sys_show_timer = 0;
     static bool     sys_show_flag  = false;
@@ -293,6 +294,7 @@ void sys_sw_led_show(void) {
 
     }
 }
+#endif  // ifdef USE_KB_MACWIN_SW_LEDS
 
 /**
  * @brief  sleep_sw_led_show.
@@ -467,13 +469,13 @@ static void side_static_mode_show(void) {
  * @brief  side_off_mode_show.
  */
 static void side_off_mode_show(void) {
-    /*
+    #ifdef USE_SIDE_LED_BLACK_MODE
     r_temp = 0x00;
     g_temp = 0x00;
     b_temp = 0x00;
 
     side_rgb_set_color_all(r_temp, g_temp, b_temp);
-    */
+    #endif  // ifdef USE_SIDE_LED_BLACK_MODE
 }
 
 /**
@@ -526,6 +528,7 @@ void rf_led_show(void) {
 /**
  * @brief  bat_percent_led.
  */
+#ifdef USE_KB_BAT_LED_SHOW
 void bat_percent_led(void) {
     uint8_t bat_end_led = 0;
     uint8_t bat_percent = dev_info.rf_battery;
@@ -551,10 +554,12 @@ void bat_percent_led(void) {
     for (; i < 6; i++)
         side_rgb_set_color(11 - i, 0, 0, 0);
 }
+#endif  // ifdef USE_KB_BAT_LED_SHOW
 
 /**
  * @brief  bat_led_show.
  */
+#ifdef USE_KB_BAT_LED_SHOW
 void bat_led_show(void) {
     static bool bat_show_flag   = 1;
     static bool bat_show_breath = 0;
@@ -618,6 +623,7 @@ void bat_led_show(void) {
         }
     }
 }
+#endif  // ifdef USE_KB_BAT_LED_SHOW
 
 /**
  * @brief  device_reset_show.
@@ -723,9 +729,13 @@ void side_led_show(void) {
         }
     }
 
+    #ifdef USE_KB_BAT_LED_SHOW
     bat_led_show();
+    #endif
     sleep_sw_led_show();
+    #ifdef USE_KB_MACWIN_SW_LEDS
     sys_sw_led_show();
+    #endif
 
     sys_led_show();
     rf_led_show();
